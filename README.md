@@ -3,8 +3,12 @@ Excel plugin for the BitMex exchange. Provides real-time market data from BitMex
 
 Compile with Visual Studio Express 2012 for Windows Desktop, or just grab the XLL file from the Releases.
 
+## Installation
+Open Excel 2013. Select File.. Options.. Add-Ins, and click Manage "Excel Add-ins" Go...
+Click "Browse" and select the relevant XLL file to install.
+
 ## Functions
-Currently provides bid and ask prices and sizes for the top 10 levels of each product (Open the included .xlx for examples)
+Currently provides bid and ask prices and sizes for the top 10 levels of each product (Open the included .xlsx for examples)
 
 <pre>
 =BitMexBid(product, depthlevel)
@@ -14,8 +18,14 @@ Currently provides bid and ask prices and sizes for the top 10 levels of each pr
 </pre>
 
 ## Compiling
+Download and install Visual Studio Express 2012 for Windows Desktop.
+
 Install NuGet libraries:
 * Install-Package Excel-DNA
 * Install-Package WebSocket4Net
 * Install-Package fastJSON
 
+Compile the project. Install the resulting .xll file into Excel.
+
+## Issues
+Check the log file (notepad %temp%\BitMexRTD.log) for any issues.
