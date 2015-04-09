@@ -85,7 +85,7 @@ namespace BitMex
         {
             try
             {
-                Logging.Log("Incoming {0}", data);
+                //Logging.Log("Incoming {0}", data);
 
                 //subscriptions
                 if (data.Contains("Welcome"))
