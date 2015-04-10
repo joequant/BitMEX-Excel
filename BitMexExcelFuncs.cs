@@ -32,6 +32,11 @@ namespace BitMex
         }
 
         //download instruments. Default to downloading all, or set e.g. state="Open" to download open contracts only
+        public static object BitMexInstrumentsActive()
+        {
+            return BitMexInstruments("Open");
+        }
+
         public static object BitMexInstruments(string state = null)
         {
             BitMexAPI _api = new BitMexAPI();

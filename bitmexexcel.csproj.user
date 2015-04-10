@@ -10,4 +10,7 @@
     <StartArguments>"C:\Users\steve\Documents\Visual Studio 2012\Projects\SlicifyClient\bitmexexcel\bin\Debug\bitmexexcel-AddIn.xll"</StartArguments>
     <StartAction>Program</StartAction>
   </PropertyGroup>
+  <PropertyGroup>
+    <ProjectView>ShowAllFiles</ProjectView>
+  </PropertyGroup>
 </Project>
