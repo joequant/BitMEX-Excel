@@ -4,6 +4,7 @@ Excel plugin for the BitMex exchange. Provides real-time market data from BitMex
 Compile with Visual Studio Express 2012 for Windows Desktop, or just grab the XLL file from the Releases.
 
 ## Installation
+Download all the binary files from the selected release (*.dna, *.xll, *.dll), and place together in a directory.
 Open Excel 2013. Select File.. Options.. Add-Ins, and click Manage "Excel Add-ins" Go...
 Click "Browse" and select the relevant XLL file to install.
 
