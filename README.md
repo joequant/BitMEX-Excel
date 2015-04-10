@@ -11,10 +11,14 @@ Click "Browse" and select the relevant XLL file to install.
 Currently provides bid and ask prices and sizes for the top 10 levels of each product (Open the included .xlsx for examples)
 
 <pre>
-=BitMexBid(product, depthlevel)
-=BitMexBidVol(product, depthlevel)
-=BitMexAsk(product, depthlevel)
-=BitMexAskVol(product, depthlevel)
+//get bid/ask info. Omit depthlevel to get top of book
+=BitMexBid(product, {depthlevel})
+=BitMexBidVol(product, {depthlevel})
+=BitMexAsk(product, {depthlevel})
+=BitMexAskVol(product, {depthlevel})
+
+//download all instruments as an array into excel. pass "Open" to download open instruments only, or omit to get all instruments.
+=BitMexInstruments({state})
 </pre>
 
 ## Compiling
