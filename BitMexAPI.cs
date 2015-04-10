@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
@@ -10,10 +11,11 @@ using WebSocket4Net;
 
 namespace BitMex
 {
-    internal class BitMexWebsocket
+    internal class BitMexAPI
     {
+        public event EventHandler<MarketDataSnapshot> OnDataUpdate;
+
         private WebSocket ws;
-        public event EventHandler<MarketDataSnapshot> OnDataUpdate; 
         private List<string> SnapshotQueue = new List<string>();
 
         public void Reconnect()
@@ -229,6 +231,31 @@ namespace BitMex
 
         }
 
+        //TODO to avoid spreadsheet locking, download asynchronously and callback when download completed
+        public List<BitMexInstrument> DownloadInstrumentList(string state)
+        {
+            List<BitMexInstrument> instruments = new List<BitMexInstrument>();
+            try
+            {
+                WebClient client = new WebClient();
+                string json = client.DownloadString("https://www.bitmex.com/api/v1/instrument");
+
+                if (json == null)
+                    Logging.Log("BitMexHandler - instrument download failed");
+                else
+                {
+                    instruments = JSON.ToObject<List<BitMexInstrument>>(json);
+                    instruments = instruments.Where(s => state == null || state.Equals(s.state)).OrderBy(s => s.state).ThenBy(s => s.rootSymbol).ThenByDescending(s => s.expiry).ToList();
+                }
+
+            }
+            catch (Exception ex)
+            {
+                Logging.Log("BitMexHandler download exception {0}", ex.Message);
+            }
+
+            return instruments;
+        }
     }
 
     [Serializable]
@@ -282,5 +309,39 @@ namespace BitMex
         {
             return symbol + " " + level + " " + bidSize + " @ " + bidPrice + " / " + askSize + " @ " + askPrice;
         }
+    }
+
+    [Serializable]
+    public class BitMexInstrument
+    {
+        public string symbol;
+        public string rootSymbol;
+        public string state;
+        public string typ;
+        public string listing;
+        public string expiry;
+        public string underlying;
+        public string buyLeg;
+        public string sellLeg;
+        public string quoteCurrency;
+        public string reference;
+        public string referenceSymbol;
+        public decimal tickSize;
+        public long multiplier;
+        public string settlCurrency;
+        public decimal initMargin;
+        public decimal maintMargin;
+        public decimal limit;
+        public string openingTimestamp;
+        public string closingTimestamp;
+        public decimal prevClosePrice;
+        public decimal limitDownPrice;
+        public decimal limitUpPrice;
+        public decimal volume;
+        public bool isQuanto;
+        public decimal totalVolume;
+        public decimal vwap;
+        public decimal openInterest;
+        //...
     }
 }

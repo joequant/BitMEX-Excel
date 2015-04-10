@@ -26,7 +26,7 @@ namespace BitMex
     [ComVisible(true)]
     public class DataServer : ExcelRtdServer
     {
-        private BitMexWebsocket _ws;
+        private BitMexAPI _api;
         private Dictionary<string, TopicCollection> _topics;  //one topic corresponds to one unique item of data in Excel (product, datapoint, depth)
         
         public DataServer()
@@ -39,9 +39,9 @@ namespace BitMex
         protected override bool ServerStart()
         {
             Logging.Log("ServerStart");
-            _ws = new BitMexWebsocket();
-            _ws.OnDataUpdate += ws_OnDataUpdate; //subscribe to events when prices change
-            _ws.Reconnect();
+            _api = new BitMexAPI();
+            _api.OnDataUpdate += ws_OnDataUpdate; //subscribe to events when prices change
+            _api.Reconnect();
 
             return true;
         }
@@ -50,7 +50,7 @@ namespace BitMex
         protected override void ServerTerminate()
         {
             Logging.Log("ServerTerminate");
-            _ws.Close();
+            _api.Close();
         }
 
         void ws_OnDataUpdate(object sender, MarketDataSnapshot snap)
@@ -114,7 +114,7 @@ namespace BitMex
             if (!_topics.ContainsKey(product))
             {
                 _topics[product] = new TopicCollection();
-                _ws.GetSnapshot(product);
+                _api.GetSnapshot(product);
             }
 
             _topics[product].TopicItems[Tuple.Create(dataPoint, level)] = topic;

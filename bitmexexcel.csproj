@@ -70,7 +70,8 @@
   <ItemGroup>
     <Compile Include="BitMexExcelFuncs.cs" />
     <Compile Include="BitMexRTDServer.cs" />
-    <Compile Include="BitMexWebsocket.cs" />
+    <Compile Include="BitMexAPI.cs" />
+    <Compile Include="ExcelResizer.cs" />
     <Compile Include="Logging.cs" />
     <Compile Include="MarketData.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
