@@ -17,8 +17,9 @@ Currently provides bid and ask prices and sizes for the top 10 levels of each pr
 =BitMexAsk(product, {depthlevel})
 =BitMexAskVol(product, {depthlevel})
 
-//download all instruments as an array into excel. pass "Open" to download open instruments only, or omit to get all instruments.
+//download all instruments as an array into excel. pass state to download particular instruments in a particular state (e.g. "Open") only, or omit to get all instruments.
 =BitMexInstruments({state})
+=BitMexInstrumentsActive()   //equivalent to =BitMexInstruments("Open")
 </pre>
 
 ## Compiling
