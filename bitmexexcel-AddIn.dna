@@ -1,6 +1,8 @@
 <DnaLibrary Name="bitmexexcel Add-In" RuntimeVersion="v4.0">
   <ExternalLibrary Path="bitmexexcel.dll" LoadFromBytes="true" Pack="true" />
-  
+  <Reference Path="fastJSON.dll" Pack="true" />
+  <Reference Path="WebSocket4Net.dll" Pack="true" />
+
   <!-- 
        The RuntimeVersion attribute above allows two settings:
        * RuntimeVersion="v2.0" - for .NET 2.0, 3.0 and 3.5

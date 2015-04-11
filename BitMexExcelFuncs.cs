@@ -39,13 +39,15 @@ namespace BitMex
 
         public static object BitMexInstruments(string state = null)
         {
-            BitMexAPI _api = new BitMexAPI();
-            List<BitMexInstrument> instruments = _api.DownloadInstrumentList(state);
+            //download the current list of instruments from the API
+            BitMexAPI api = new BitMexAPI();
+            List<BitMexInstrument> instruments = api.DownloadInstrumentList(state);
 
             int rows = instruments.Count + 1; //add 1 for header row
 
             object[,] result = new string[rows, 12];
 
+            //first row will be the headers
             result[0, 0] = "Symbol";
             result[0, 1] = "RootSymbol";
             result[0, 2] = "State";
@@ -59,6 +61,7 @@ namespace BitMex
             result[0, 10] = "Vwap";
             result[0, 11] = "OpenInterest";
 
+            //add all the instrument details
             for (int i = 0; i < instruments.Count; i++)
             {
                 result[i + 1, 0] = instruments[i].symbol;
@@ -75,7 +78,7 @@ namespace BitMex
                 result[i + 1, 11] = instruments[i].openInterest.ToString();
             }
 
-            // Call Resize via Excel - so if the Resize add-in is not part of this code, it should still work.
+            // Excel-DNA hack to resize the resulting result set to the right number of rows/columns
             return XlCall.Excel(XlCall.xlUDF, "Resize", result);
         }
     }

@@ -66,7 +66,7 @@ namespace BitMex
             //get snapshot
             if(ws != null && ws.State == WebSocketState.Open)
                 SendSnapshotRequest(product);
-            else
+            else if(!SnapshotQueue.Contains(product))
                 SnapshotQueue.Add(product);
         }
 
@@ -93,7 +93,7 @@ namespace BitMex
                 if (data.Contains("Welcome"))
                 {
                     //subscribe streaming depth changes (top 10 levels)
-                    ws.Send("{\"op\": \"subscribe\", \"args\": [\"trade\", \"orderBook10\"]}");
+                    ws.Send("{\"op\": \"subscribe\", \"args\": [\"orderBook10\"]}");
 
                     //send request for any products
                     foreach (string product in SnapshotQueue)
