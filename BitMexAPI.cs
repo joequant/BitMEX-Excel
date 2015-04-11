@@ -13,7 +13,8 @@ namespace BitMex
 {
     internal class BitMexAPI
     {
-        public event EventHandler<MarketDataSnapshot> OnDataUpdate;
+        public event EventHandler<MarketDataSnapshot> OnDepthUpdate;
+        public event EventHandler<BitMexTrade> OnTradeUpdate;
 
         private WebSocket ws;
         private List<string> SnapshotQueue = new List<string>();
@@ -93,7 +94,9 @@ namespace BitMex
                 if (data.Contains("Welcome"))
                 {
                     //subscribe streaming depth changes (top 10 levels)
-                    ws.Send("{\"op\": \"subscribe\", \"args\": [\"orderBook10\"]}");
+                    string subscription = "{\"op\": \"subscribe\", \"args\": [\"trade\", \"orderBook10\"]}";
+                    Logging.Log("Send subscription request: {0}", subscription);
+                    ws.Send(subscription);
 
                     //send request for any products
                     foreach (string product in SnapshotQueue)
@@ -113,6 +116,10 @@ namespace BitMex
                         //returned by getSymbol snapshot call
                         ProcessDepth(data);
                     }
+                    else if (streamType.table.Equals("trade"))
+                    {
+                        ProcessTrade(data);
+                    }
                 }
                 else if (data.Contains("error"))
                 {
@@ -123,6 +130,26 @@ namespace BitMex
             catch (Exception ex)
             {
                 Logging.Log("BitMexHandler couldnt parse {0} {1}", data, ex.Message);
+            }
+        }
+
+        private void ProcessTrade(string data)
+        {
+            try
+            {
+                BitMexStreamTrade trade = JSON.ToObject<BitMexStreamTrade>(data);
+
+                //notify all new trades
+                foreach (BitMexTrade tradeInfo in trade.data)
+                {
+                    Logging.Log("Incoming trade: {0} {1} {2}", tradeInfo.symbol, tradeInfo.price, tradeInfo.timestamp);
+                    if (OnTradeUpdate != null)
+                        OnTradeUpdate(null, tradeInfo);
+                }
+            }
+            catch (Exception ex)
+            {
+                Logging.Log("BitMexHandler Trade {0}", ex.Message);
             }
         }
 
@@ -158,8 +185,8 @@ namespace BitMex
                 }
 
                 //notify listeners
-                if(OnDataUpdate != null)
-                    OnDataUpdate(null, snap);
+                if(OnDepthUpdate != null)
+                    OnDepthUpdate(null, snap);
 
             }
             catch (Exception ex)
@@ -219,8 +246,8 @@ namespace BitMex
                     }
 
                     //notify listeners
-                    if (OnDataUpdate != null)
-                        OnDataUpdate(null, snap);
+                    if (OnDepthUpdate != null)
+                        OnDepthUpdate(null, snap);
                 }
 
             }
@@ -347,6 +374,25 @@ namespace BitMex
         public decimal underlyingToSettleMultiplier;
         public decimal highPrice;
         public decimal lowPrice;
+        public decimal lastPrice;
         //...
+    }
+
+    [Serializable]
+    public class BitMexStreamTrade
+    {
+        public string table;
+        public string action;
+        public List<string> keys;
+        public List<BitMexTrade> data;
+    }
+
+    [Serializable]
+    public class BitMexTrade
+    {
+        public long timestamp;
+        public string symbol;
+        public decimal size;
+        public decimal price;
     }
 }

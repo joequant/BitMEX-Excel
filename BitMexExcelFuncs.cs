@@ -31,6 +31,11 @@ namespace BitMex
             return XlCall.RTD("BitMex.DataServer", null, product, DataPoint.AskVol.ToString(), level.ToString());
         }
 
+        public static object BitMexLastPrice(string product)
+        {
+            return XlCall.RTD("BitMex.DataServer", null, product, DataPoint.Last.ToString());
+        }
+
         //download instruments. Default to downloading all, or set e.g. state="Open" to download open contracts only
         public static object BitMexInstrumentsActive()
         {

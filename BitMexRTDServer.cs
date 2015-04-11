@@ -52,7 +52,15 @@ namespace BitMex
         {
             Logging.Log("ServerStart");
             _api = new BitMexAPI();
-            _api.OnDataUpdate += ws_OnDataUpdate; //subscribe to events so that we'll be notified when prices change
+
+            //download instruments to get last price snapshot
+            List<BitMexInstrument> instruments = _api.DownloadInstrumentList(null);
+            foreach (BitMexInstrument instrument in instruments)
+                _cache.Instruments[instrument.symbol] = instrument;
+
+            //then connect to websocket to get updates
+            _api.OnDepthUpdate += _api_OnDataUpdate;  //subscribe to events so that we'll be notified when prices change
+            _api.OnTradeUpdate += _api_OnTradeUpdate; //and when products trade
             _api.Reconnect();
 
             return true;
@@ -65,8 +73,35 @@ namespace BitMex
             _api.Close();
         }
 
+        void _api_OnTradeUpdate(object sender, BitMexTrade trade)
+        {
+            //update data cache
+            if(!_cache.Instruments.ContainsKey(trade.symbol))
+            {
+                Logging.Log("Market trade, but instrument not yet downloaded", trade.symbol, trade.price);
+            }
+            else
+            {
+                Logging.Log("Updating last price {0} {1}", trade.symbol, trade.price);
+                _cache.Instruments[trade.symbol].lastPrice = trade.price;
+            }
+
+            //no current subscription for this product
+            if (!_topics.ContainsKey(trade.symbol))
+                return;
+
+            Dictionary<Tuple<DataPoint, int>, Topic> productTopics = _topics[trade.symbol].TopicItems;
+
+            //update any last price/size subscriptions
+            Tuple<DataPoint, int> key = Tuple.Create(DataPoint.Last, 0);
+            if (productTopics.ContainsKey(key))
+                productTopics[key].UpdateValue(trade.price);
+
+        }
+
+
         //callback from the background websocket thread. Checks and updates any matching topics.
-        void ws_OnDataUpdate(object sender, MarketDataSnapshot snap)
+        void _api_OnDataUpdate(object sender, MarketDataSnapshot snap)
         {
             //update data cache
             _cache.MarketData[snap.Product] = snap;
@@ -162,41 +197,65 @@ namespace BitMex
 
             //return data
             //--
-
-            if (!_cache.MarketData.ContainsKey(product))
+            if(dataPoint == DataPoint.Last)
             {
-                //if product is not yet in cache, request snapshot
-                //this can happen if a product doesnt update very frequently
-                _api.GetSnapshot(product);
-                result = ExcelErrorUtil.ToComError(ExcelError.ExcelErrorGettingData);             //return "pending data" to Excel
-            }
-            else
-            {
-                //get data from cache
-                MarketDataSnapshot snap = _cache.MarketData[product];
-                switch(dataPoint)
+                if (!_cache.Instruments.ContainsKey(product))
                 {
-                    case DataPoint.Bid:
-                        result = snap.BidDepth[level].Price;
-                        break;
-
-                    case DataPoint.BidVol:
-                        result = snap.BidDepth[level].Qty;
-                        break;
-
-                    case DataPoint.Ask:
-                        result = snap.AskDepth[level].Price;
-                        break;
-
-                    case DataPoint.AskVol:
-                        result = snap.AskDepth[level].Qty;
-                        break;
-
-                    default:
-                        result = ExcelErrorUtil.ToComError(ExcelError.ExcelErrorNA);
-                        break;
+                    //may be empty when sheet is first loaded
+                    result = ExcelErrorUtil.ToComError(ExcelError.ExcelErrorGettingData);             //return "pending data" to Excel
                 }
+                else
+                {
+                    //get data from cache
+                    BitMexInstrument inst = _cache.Instruments[product];
+                    switch(dataPoint)
+                    {
+                        case DataPoint.Last:
+                            result = inst.lastPrice;
+                            break;
 
+                        default:
+                            result = ExcelErrorUtil.ToComError(ExcelError.ExcelErrorNA);
+                            break;
+                    }
+                }
+            }
+            else //bid/ask etc
+            {
+                if (!_cache.MarketData.ContainsKey(product))
+                {
+                    //if product is not yet in cache, request snapshot
+                    //this can happen if a product doesnt update very frequently
+                    _api.GetSnapshot(product);
+                    result = ExcelErrorUtil.ToComError(ExcelError.ExcelErrorGettingData);             //return "pending data" to Excel
+                }
+                else
+                {
+                    //get data from cache
+                    MarketDataSnapshot snap = _cache.MarketData[product];
+                    switch(dataPoint)
+                    {
+                        case DataPoint.Bid:
+                            result = snap.BidDepth[level].Price;
+                            break;
+
+                        case DataPoint.BidVol:
+                            result = snap.BidDepth[level].Qty;
+                            break;
+
+                        case DataPoint.Ask:
+                            result = snap.AskDepth[level].Price;
+                            break;
+
+                        case DataPoint.AskVol:
+                            result = snap.AskDepth[level].Qty;
+                            break;
+
+                        default:
+                            result = ExcelErrorUtil.ToComError(ExcelError.ExcelErrorNA);
+                            break;
+                    }
+                }
             }
 
             return result;
@@ -239,7 +298,8 @@ namespace BitMex
         Bid,
         Ask,
         BidVol,
-        AskVol
+        AskVol,
+        Last
     }
 
     internal class TopicCollection
