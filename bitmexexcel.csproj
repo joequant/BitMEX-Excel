@@ -71,6 +71,7 @@
     <Compile Include="BitMexExcelFuncs.cs" />
     <Compile Include="BitMexRTDServer.cs" />
     <Compile Include="BitMexAPI.cs" />
+    <Compile Include="DataCache.cs" />
     <Compile Include="ExcelResizer.cs" />
     <Compile Include="Logging.cs" />
     <Compile Include="MarketData.cs" />
