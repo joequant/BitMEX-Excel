@@ -1,6 +1,8 @@
 # BitMexExcel
 Excel plugin for the BitMex exchange. Provides real-time market data from BitMex into Excel.
 
+Released under Apache 2.0 licence, so free to use for commercial as well as non-commercial purposes.
+
 Compile with Visual Studio Express 2012 for Windows Desktop, or just grab the XLL file from the Releases.
 
 ## Installation
