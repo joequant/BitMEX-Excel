@@ -45,7 +45,7 @@ namespace BitMex
 
             int rows = instruments.Count + 1; //add 1 for header row
 
-            object[,] result = new string[rows, 12];
+            object[,] result = new string[rows, 19];
 
             //first row will be the headers
             result[0, 0] = "Symbol";
@@ -60,6 +60,13 @@ namespace BitMex
             result[0, 9] = "Volume";
             result[0, 10] = "Vwap";
             result[0, 11] = "OpenInterest";
+            result[0, 12] = "UnderlyingSymbol";
+            result[0, 13] = "SettleCurrency";
+            result[0, 14] = "UnderlyingToSettleMultiplier";
+            result[0, 15] = "IsQuanto";
+            result[0, 16] = "IsInverse";
+            result[0, 17] = "High";
+            result[0, 18] = "Low";
 
             //add all the instrument details
             for (int i = 0; i < instruments.Count; i++)
@@ -76,6 +83,13 @@ namespace BitMex
                 result[i + 1, 9] = instruments[i].volume.ToString();
                 result[i + 1, 10] = instruments[i].vwap.ToString();
                 result[i + 1, 11] = instruments[i].openInterest.ToString();
+                result[i + 1, 12] = instruments[i].underlyingSymbol;
+                result[i + 1, 13] = instruments[i].settlCurrency;
+                result[i + 1, 14] = instruments[i].underlyingToSettleMultiplier.ToString();
+                result[i + 1, 15] = instruments[i].isQuanto.ToString();
+                result[i + 1, 16] = instruments[i].isInverse.ToString();
+                result[i + 1, 17] = instruments[i].highPrice.ToString();
+                result[i + 1, 18] = instruments[i].lowPrice.ToString();
             }
 
             // Excel-DNA hack to resize the resulting result set to the right number of rows/columns

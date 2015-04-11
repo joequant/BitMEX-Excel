@@ -339,9 +339,14 @@ namespace BitMex
         public decimal limitUpPrice;
         public decimal volume;
         public bool isQuanto;
+        public bool isInverse;
         public decimal totalVolume;
         public decimal vwap;
         public decimal openInterest;
+        public string underlyingSymbol;
+        public decimal underlyingToSettleMultiplier;
+        public decimal highPrice;
+        public decimal lowPrice;
         //...
     }
 }
