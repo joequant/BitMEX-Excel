@@ -278,10 +278,44 @@ namespace BitMex
             }
             catch (Exception ex)
             {
-                Logging.Log("BitMexHandler download exception {0}", ex.Message);
+                Logging.Log("BitMexHandler instrument download exception {0}", ex.Message);
             }
 
             return instruments;
+        }
+
+        //TODO to avoid spreadsheet locking, download asynchronously and callback when download completed
+        public List<BitMexIndex> DownloadIndex(string symbol, int count, DateTime start, DateTime end)
+        {
+            List<BitMexIndex> index = new List<BitMexIndex>();
+            try
+            {
+                WebClient client = new WebClient();
+                client.QueryString.Add("symbol", symbol);
+                if (count >= 0)
+                    client.QueryString.Add("count", count.ToString());
+                if (start != default(DateTime))
+                    client.QueryString.Add("startTime", start.ToString("yyyy-MM-ddTHH:mm:ss.fffZ"));
+                if (end != default(DateTime) && end >= start && end.Year > 2000)    //excel can pass 1899 as a default date, so validate > y2k
+                    client.QueryString.Add("endTime", end.ToString("yyyy-MM-ddTHH:mm:ss.fffZ"));
+                 
+                string json = client.DownloadString("https://www.bitmex.com/api/v1/trade");
+
+                if (json == null)
+                    Logging.Log("BitMexHandler - instrument download failed");
+                else
+                {
+                    index = JSON.ToObject<List<BitMexIndex>>(json);
+                    index = index.OrderByDescending(s => s.timestamp).ToList();
+                }
+
+            }
+            catch (Exception ex)
+            {
+                Logging.Log("BitMexHandler index download exception {0}", ex.Message);
+            }
+
+            return index;
         }
     }
 
@@ -395,4 +429,16 @@ namespace BitMex
         public decimal size;
         public decimal price;
     }
+
+    [Serializable]
+    public class BitMexIndex
+    {
+        public string timestamp;
+        public string symbol;
+        public string side;
+        public decimal size;
+        public decimal price;
+        public string tickDirection;
+    }
+
 }

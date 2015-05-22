@@ -100,6 +100,38 @@ namespace BitMex
             // Excel-DNA hack to resize the resulting result set to the right number of rows/columns
             return XlCall.Excel(XlCall.xlUDF, "Resize", result);
         }
+
+
+        public static object BitMexIndex(string symbol, int count = -1, DateTime start = default(DateTime), DateTime end = default(DateTime))
+        {
+            //download the current list of instruments from the API
+            BitMexAPI api = new BitMexAPI();
+            List<BitMexIndex> index = api.DownloadIndex(symbol, count, start, end);
+
+            int rows = index.Count + 1; //add 1 for header row
+
+            object[,] result = new string[rows, 5];
+
+            //first row will be the headers
+            result[0, 0] = "Timestamp";
+            result[0, 1] = "Symbol";
+            result[0, 2] = "Side";
+            result[0, 3] = "Size";
+            result[0, 4] = "Price";
+
+            //add all the instrument details
+            for (int i = 0; i < index.Count; i++)
+            {
+                result[i + 1, 0] = index[i].timestamp;
+                result[i + 1, 1] = index[i].symbol;
+                result[i + 1, 2] = index[i].side;
+                result[i + 1, 3] = index[i].size.ToString();
+                result[i + 1, 4] = index[i].price.ToString();
+            }
+
+            // Excel-DNA hack to resize the resulting result set to the right number of rows/columns
+            return XlCall.Excel(XlCall.xlUDF, "Resize", result);
+        }
     }
 
 }
