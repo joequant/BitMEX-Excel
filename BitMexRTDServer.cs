@@ -141,18 +141,11 @@ namespace BitMex
             }
         }
 
-        int GetTopicId(Topic topic)
-        {
-            return (int)typeof(Topic)
-                        .GetField("TopicId", BindingFlags.GetField | BindingFlags.Instance | BindingFlags.NonPublic)
-                        .GetValue(topic);
-        }
-
         //New RTD subscription callback
         protected override object ConnectData(Topic topic, IList<string> topicInfo, ref bool newValues)
         {
             object result;
-            int topicId = GetTopicId(topic);
+            int topicId = topic.TopicId;
 
             Logging.Log("ConnectData: {0} - {{{1}}}", topicId, string.Join(", ", topicInfo));
 
@@ -264,7 +257,7 @@ namespace BitMex
         //Called when an RTD subscription is no longer needed
         protected override void DisconnectData(Topic topic)
         {
-            int topicId = GetTopicId(topic);
+            int topicId = topic.TopicId;
             Logging.Log("DisconnectData: {0}", topicId);
 
             //remove topic on unsubscribe
